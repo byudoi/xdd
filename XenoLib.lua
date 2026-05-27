@@ -1,26 +1,14 @@
--- ╔═══════════════════════════════════════════════════════════╗
--- ║               8y9 UI LIBRARY v1.0                        ║
--- ║           Mobile + PC | Auto Device Detection            ║
--- ╚═══════════════════════════════════════════════════════════╝
-
-local XenoLib = {}
-XenoLib.__index = XenoLib
-
--- ── Services ──────────────────────────────────────────────────
+local _8y9Lib = {}
+_8y9Lib.__index = _8y9Lib
 local Players           = game:GetService("Players")
 local UserInputService  = game:GetService("UserInputService")
 local TweenService      = game:GetService("TweenService")
 local RunService        = game:GetService("RunService")
 local CoreGui           = game:GetService("CoreGui")
 local TextService       = game:GetService("TextService")
-
 local LocalPlayer = Players.LocalPlayer
 local Mouse       = LocalPlayer:GetMouse()
-
--- ── Device Detection ──────────────────────────────────────────
 local IsMobile = UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
-
--- ── Theme ─────────────────────────────────────────────────────
 local Theme = {
 	Background   = Color3.fromRGB(13,  13,  13),
 	Surface      = Color3.fromRGB(20,  20,  20),
@@ -46,14 +34,10 @@ local Theme = {
 	DropdownBG   = Color3.fromRGB(22,  22,  22),
 	Shadow       = Color3.fromRGB(0,   0,   0),
 }
-
--- ── Sizes (Mobile vs PC) ──────────────────────────────────────
 local _vp       = workspace.CurrentCamera.ViewportSize
 local _sw, _sh  = _vp.X, _vp.Y
--- Mobile: ocupa ~88% de la pantalla, máximo 460x640
 local _mw = math.min(math.floor(_sw * 0.88), 460)
 local _mh = math.min(math.floor(_sh * 0.82), 620)
-
 local Sizes = IsMobile and {
 	WindowW     = _mw,       WindowH   = _mh,
 	NavW        = 130,       NavH      = 40,
@@ -81,23 +65,18 @@ local Sizes = IsMobile and {
 	DropH       = 32,    BotBarH   = 54,
 	LogoSize    = 32,
 }
-
--- ── Tween Helper ──────────────────────────────────────────────
 local function Tween(obj, props, t, style, dir)
 	TweenService:Create(obj,
 		TweenInfo.new(t or 0.18, style or Enum.EasingStyle.Quart, dir or Enum.EasingDirection.Out),
 		props
 	):Play()
 end
-
--- ── Corner / Stroke helpers ───────────────────────────────────
 local function Corner(parent, r)
 	local c = Instance.new("UICorner")
 	c.CornerRadius = UDim.new(0, r or Sizes.CornerR)
 	c.Parent = parent
 	return c
 end
-
 local function Stroke(parent, color, thickness)
 	local s = Instance.new("UIStroke")
 	s.Color = color or Theme.Border
@@ -106,7 +85,6 @@ local function Stroke(parent, color, thickness)
 	s.Parent = parent
 	return s
 end
-
 local function Padding(parent, all, top, bottom, left, right)
 	local p = Instance.new("UIPadding")
 	if all then
@@ -123,7 +101,6 @@ local function Padding(parent, all, top, bottom, left, right)
 	p.Parent = parent
 	return p
 end
-
 local function ListLayout(parent, dir, pad, align)
 	local l = Instance.new("UIListLayout")
 	l.FillDirection = dir or Enum.FillDirection.Vertical
@@ -133,7 +110,6 @@ local function ListLayout(parent, dir, pad, align)
 	l.Parent        = parent
 	return l
 end
-
 local function Label(parent, text, size, color, weight, xalign)
 	local l = Instance.new("TextLabel")
 	l.Text              = text
@@ -146,7 +122,6 @@ local function Label(parent, text, size, color, weight, xalign)
 	l.Parent            = parent
 	return l
 end
-
 local function Frame(parent, size, pos, color, trans)
 	local f = Instance.new("Frame")
 	f.Size                   = size or UDim2.new(1,0,0,40)
@@ -157,7 +132,6 @@ local function Frame(parent, size, pos, color, trans)
 	f.Parent                 = parent
 	return f
 end
-
 local function ImageLabel(parent, id, size, pos)
 	local i = Instance.new("ImageLabel")
 	i.Image                  = id
@@ -167,9 +141,6 @@ local function ImageLabel(parent, id, size, pos)
 	i.Parent                 = parent
 	return i
 end
-
--- ── Icons (simple unicode substitutes via TextLabel) ──────────
--- Using Roblox-compatible font icons (GothamBold fallback symbols)
 local NavIcons = {
 	MAIN     = "⌂",
 	VISUALS  = "◎",
@@ -181,20 +152,13 @@ local NavIcons = {
 	CONFIGS  = "☰",
 	SETTINGS = "✦",
 }
-
--- ══════════════════════════════════════════════════════════════
---   WINDOW
--- ══════════════════════════════════════════════════════════════
-function XenoLib.new(config)
+function _8y9Lib.new(config)
 	config = config or {}
-
-	local self = setmetatable({}, XenoLib)
+	local self = setmetatable({}, _8y9Lib)
 	self.Tabs       = {}
 	self.CurrentTab = nil
 	self.Toggled    = true
 	self.Callbacks  = {}
-
-	-- ── ScreenGui ─────────────────────────────────────────────
 	local ScreenGui = Instance.new("ScreenGui")
 	ScreenGui.Name              = "8y9Lib_" .. tostring(math.random(1e5))
 	ScreenGui.ZIndexBehavior    = Enum.ZIndexBehavior.Sibling
@@ -203,8 +167,6 @@ function XenoLib.new(config)
 	pcall(function() ScreenGui.Parent = CoreGui end)
 	if not ScreenGui.Parent then ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui") end
 	self.ScreenGui = ScreenGui
-
-	-- ── Main Window ───────────────────────────────────────────
 	local Window = Frame(ScreenGui,
 		UDim2.new(0, Sizes.WindowW, 0, Sizes.WindowH),
 		UDim2.new(0.5, 0, 0.5, 0),
@@ -215,22 +177,17 @@ function XenoLib.new(config)
 	Corner(Window, 12)
 	Stroke(Window, Theme.Border, 1)
 	self.Window = Window
-
-	-- Entrance animation
 	Window.Size                   = UDim2.new(0, Sizes.WindowW, 0, 0)
 	Window.BackgroundTransparency = 1
 	Tween(Window, {
 		Size = UDim2.new(0, Sizes.WindowW, 0, Sizes.WindowH),
 		BackgroundTransparency = 0
 	}, 0.35, Enum.EasingStyle.Quint)
-
-	-- ── Drag (PC only) ────────────────────────────────────────
 	if not IsMobile then
 		local dragging, dragStart, startPos = false, nil, nil
 		Window.InputBegan:Connect(function(input)
 			if input.UserInputType == Enum.UserInputType.MouseButton1 then
 				local mp = input.Position
-				-- only drag from top bar area (y < 55)
 				if mp.Y - Window.AbsolutePosition.Y < 55 then
 					dragging  = true
 					dragStart = mp
@@ -252,25 +209,18 @@ function XenoLib.new(config)
 			end
 		end)
 	end
-
-	-- ══════════════════════════════════════════════════════════
-	--   TOP BAR
-	-- ══════════════════════════════════════════════════════════
 	local TopBar = Frame(Window,
 		UDim2.new(1,0,0,0), UDim2.new(0,0,0,0),
-		Theme.Background, 1)   -- transparent, no visual bg
+		Theme.Background, 1)
 	TopBar.Name           = "TopBar"
 	TopBar.ZIndex         = 10
 	TopBar.AutomaticSize  = Enum.AutomaticSize.Y
-
-	-- only PC gets minimize/close buttons
 	if not IsMobile then
 		local BtnHolder = Frame(TopBar,
 			UDim2.new(0,60,0,36),
 			UDim2.new(1,-68,0,8),
 			Theme.Background, 1)
 		BtnHolder.Name = "WinBtns"
-
 		local function WinBtn(pos, color, action)
 			local b = Instance.new("TextButton")
 			b.Size = UDim2.new(0,22,0,22)
@@ -290,8 +240,6 @@ function XenoLib.new(config)
 			end)
 			return b
 		end
-
-		-- Minimize
 		WinBtn(UDim2.new(0,0,0,0), Color3.fromRGB(60,60,60), function()
 			self.Toggled = not self.Toggled
 			if self.Toggled then
@@ -300,42 +248,29 @@ function XenoLib.new(config)
 				Tween(Window, {Size = UDim2.new(0,Sizes.WindowW,0,52)}, 0.3, Enum.EasingStyle.Quint)
 			end
 		end)
-
-		-- Close
 		WinBtn(UDim2.new(0,30,0,0), Color3.fromRGB(60,60,60), function()
 			Tween(Window, {Size = UDim2.new(0,Sizes.WindowW,0,0), BackgroundTransparency=1}, 0.25, Enum.EasingStyle.Quint)
 			task.delay(0.3, function() ScreenGui:Destroy() end)
 		end)
 	end
-
-	-- ══════════════════════════════════════════════════════════
-	--   NAVIGATION SIDEBAR
-	-- ══════════════════════════════════════════════════════════
 	local NavPanel = Frame(Window,
 		UDim2.new(0, Sizes.NavW, 1, 0),
 		UDim2.new(0,0,0,0),
 		Theme.Surface)
 	NavPanel.Name  = "NavPanel"
 	NavPanel.ZIndex = 2
-
-	-- Right border line
 	local NavBorder = Frame(NavPanel,
 		UDim2.new(0,1,1,0), UDim2.new(1,-1,0,0),
 		Theme.Border)
 	NavBorder.Name = "NavBorder"
-
-	-- Logo area
 	local LogoArea = Frame(NavPanel,
 		UDim2.new(1,0,0,60), UDim2.new(0,0,0,0),
 		Theme.Surface, 1)
 	LogoArea.Name = "LogoArea"
 	Padding(LogoArea, nil, 0, 0, 14, 0)
-
 	local LogoRow = Frame(LogoArea, UDim2.new(1,0,1,0), UDim2.new(0,0,0,0), Theme.Surface, 1)
 	LogoRow.Name = "LogoRow"
 	ListLayout(LogoRow, Enum.FillDirection.Horizontal, 8)
-
-	-- Logo icon (custom image or fallback letter box)
 	local LogoBox = Frame(LogoRow,
 		UDim2.new(0, Sizes.LogoSize, 0, Sizes.LogoSize),
 		UDim2.new(0,0,0.5,-Sizes.LogoSize/2),
@@ -354,20 +289,15 @@ function XenoLib.new(config)
 		LogoX.Size = UDim2.new(1,0,1,0)
 		LogoX.TextYAlignment = Enum.TextYAlignment.Center
 	end
-
 	local LogoText = Frame(LogoRow, UDim2.new(0,90,0,Sizes.LogoSize), UDim2.new(0,0,0,0), Theme.Surface, 1)
 	local LogoName = Label(LogoText, config.Name or "8y9", Sizes.FontTitle + 2, Theme.Text, Enum.Font.GothamBold)
 	LogoName.Position = UDim2.new(0,0,0,2)
 	local LogoSub  = Label(LogoText, "8y9 Library", Sizes.FontLabel - 1, Theme.TextMuted, Enum.Font.Gotham)
 	LogoSub.Position  = UDim2.new(0,0,0, Sizes.FontTitle + 4)
-
-	-- Separator
 	local NavSep = Frame(NavPanel,
 		UDim2.new(1, -28, 0, 1), UDim2.new(0, 14, 0, 62),
 		Theme.Border)
 	NavSep.Name = "NavSep"
-
-	-- Nav buttons container
 	local NavScroll = Instance.new("ScrollingFrame")
 	NavScroll.Name              = "NavScroll"
 	NavScroll.Size              = UDim2.new(1,0,1,-70)
@@ -380,13 +310,8 @@ function XenoLib.new(config)
 	NavScroll.Parent            = NavPanel
 	Padding(NavScroll, nil, 4, 4, 8, 8)
 	ListLayout(NavScroll, Enum.FillDirection.Vertical, 3)
-
 	self.NavScroll = NavScroll
 	self.NavBtns   = {}
-
-	-- ══════════════════════════════════════════════════════════
-	--   CONTENT AREA
-	-- ══════════════════════════════════════════════════════════
 	local ContentArea = Frame(Window,
 		UDim2.new(1,-Sizes.NavW,1,-Sizes.BotBarH),
 		UDim2.new(0,Sizes.NavW,0,0),
@@ -394,24 +319,18 @@ function XenoLib.new(config)
 	ContentArea.Name            = "ContentArea"
 	ContentArea.ClipsDescendants = true
 	self.ContentArea = ContentArea
-
-	-- Content header (title + search + settings)
 	local ContentHeader = Frame(ContentArea,
 		UDim2.new(1,0,0,54),
 		UDim2.new(0,0,0,0),
 		Theme.Background)
 	ContentHeader.Name = "ContentHeader"
 	Padding(ContentHeader, nil, 0, 0, Sizes.CardPad, Sizes.CardPad)
-
 	local PageTitle = Label(ContentHeader, "MAIN", Sizes.FontTitle + 2, Theme.Text, Enum.Font.GothamBold)
 	PageTitle.Position = UDim2.new(0, Sizes.CardPad, 0, 12)
 	self.PageTitle = PageTitle
-
 	local PageSubtitle = Label(ContentHeader, "Main features and quick access", Sizes.FontBody, Theme.TextDim, Enum.Font.Gotham)
 	PageSubtitle.Position = UDim2.new(0, Sizes.CardPad, 0, 30)
 	self.PageSubtitle = PageSubtitle
-
-	-- Search bar (PC)
 	if not IsMobile then
 		local SearchBox = Frame(ContentHeader,
 			UDim2.new(0, 220, 0, 32),
@@ -434,13 +353,9 @@ function XenoLib.new(config)
 		SearchInput.ClearTextOnFocus = false
 		SearchInput.Parent = SearchBox
 	end
-
-	-- Header separator
 	local HeaderSep = Frame(ContentArea,
 		UDim2.new(1,0,0,1), UDim2.new(0,0,0,54),
 		Theme.Border)
-
-	-- Scrollable content
 	local ContentScroll = Instance.new("ScrollingFrame")
 	ContentScroll.Name              = "ContentScroll"
 	ContentScroll.Size              = UDim2.new(1,0,1,-54)
@@ -453,66 +368,28 @@ function XenoLib.new(config)
 	ContentScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
 	ContentScroll.Parent            = ContentArea
 	self.ContentScroll = ContentScroll
-
-	-- ══════════════════════════════════════════════════════════
-	--   BOTTOM BAR (aesthetic, no reload/unload)
-	-- ══════════════════════════════════════════════════════════
 	local BotBar = Frame(Window,
 		UDim2.new(1,-Sizes.NavW, 0, Sizes.BotBarH),
 		UDim2.new(0, Sizes.NavW, 1, -Sizes.BotBarH),
 		Theme.Surface)
 	BotBar.Name  = "BotBar"
-
 	local BotSep = Frame(BotBar, UDim2.new(1,0,0,1), UDim2.new(0,0,0,0), Theme.Border)
-
-	-- Version + device badge
-	local BotLeft = Frame(BotBar,
-		UDim2.new(0.5,0,1,-1), UDim2.new(0,0,0,1),
-		Theme.Surface, 1)
-	Padding(BotLeft, nil, 0, 0, Sizes.CardPad, 0)
-	ListLayout(BotLeft, Enum.FillDirection.Horizontal, 8)
-	BotLeft.Name = "BotLeft"
-
-	local VerBadge = Frame(BotLeft, UDim2.new(0,60,0,22), UDim2.new(0,0,0.5,-11), Theme.ButtonBG)
-	Corner(VerBadge, 5)
-	Stroke(VerBadge, Theme.Border, 1)
-	local VerLbl = Label(VerBadge, "v1.0", Sizes.FontLabel, Theme.TextMuted, Enum.Font.GothamBold, Enum.TextXAlignment.Center)
-	VerLbl.Size = UDim2.new(1,0,1,0)
-	VerLbl.TextYAlignment = Enum.TextYAlignment.Center
-
-	local DevBadge = Frame(BotLeft, UDim2.new(0,70,0,22), UDim2.new(0,0,0.5,-11), Theme.ButtonBG)
-	Corner(DevBadge, 5)
-	Stroke(DevBadge, Theme.Border, 1)
-	local DevLbl = Label(DevBadge, IsMobile and "📱 Mobile" or "🖥 PC", Sizes.FontLabel, Theme.TextMuted, Enum.Font.Gotham, Enum.TextXAlignment.Center)
-	DevLbl.Size = UDim2.new(1,0,1,0)
-	DevLbl.TextYAlignment = Enum.TextYAlignment.Center
-
-	-- Right side: save settings button
 	local BotBtnRow = Frame(BotBar,
-		UDim2.new(0.5,0,1,-1), UDim2.new(0.5,0,0,1),
+		UDim2.new(1,0,1,-1), UDim2.new(0,0,0,1),
 		Theme.Surface, 1)
-	Padding(BotBtnRow, nil, 0, 0, 0, Sizes.CardPad)
-	ListLayout(BotBtnRow, Enum.FillDirection.Horizontal, 0)
-	BotBtnRow.HorizontalAlignment = Enum.HorizontalAlignment.Right
+	Padding(BotBtnRow, nil, 0, 0, Sizes.CardPad, Sizes.CardPad)
+	ListLayout(BotBtnRow, Enum.FillDirection.Horizontal, 8)
 	BotBtnRow.Name = "BotBtnRow"
 	self.BotBtnRow = BotBtnRow
-
-	-- Auto-create floating button
 	self._FloatGui = nil
 	self._FloatBtn = nil
 	task.defer(function()
 		self:_CreateFloatButton(config)
 	end)
-
 	return self
 end
-
--- ══════════════════════════════════════════════════════════════
---   NAV BUTTON HELPER
--- ══════════════════════════════════════════════════════════════
 local function CreateNavBtn(self, name, icon, onClick)
 	local S = Sizes
-
 	local Btn = Instance.new("TextButton")
 	Btn.Name               = name
 	Btn.Size               = UDim2.new(1,0,0,S.NavH)
@@ -523,26 +400,19 @@ local function CreateNavBtn(self, name, icon, onClick)
 	Btn.AutoButtonColor    = false
 	Btn.Parent             = self.NavScroll
 	Corner(Btn, 7)
-
-	-- Indicator bar (left side, shows when selected)
 	local Indicator = Frame(Btn, UDim2.new(0,3,0,20), UDim2.new(0,0,0.5,-10), Theme.Accent)
 	Indicator.Name  = "Indicator"
 	Corner(Indicator, 2)
 	Indicator.BackgroundTransparency = 1
-
 	local BtnRow = Frame(Btn, UDim2.new(1,0,1,0), UDim2.new(0,0,0,0), Theme.Surface, 1)
 	Padding(BtnRow, nil, 0, 0, 12, 0)
 	ListLayout(BtnRow, Enum.FillDirection.Horizontal, 8)
-
 	local IconLbl = Label(BtnRow, icon or "◆", S.FontNav, Theme.TextDim, Enum.Font.GothamBold)
 	IconLbl.Size  = UDim2.new(0, S.IconSize, 1, 0)
 	IconLbl.TextYAlignment = Enum.TextYAlignment.Center
-
 	local NameLbl = Label(BtnRow, name, S.FontNav, Theme.TextDim, Enum.Font.GothamBold)
 	NameLbl.Size  = UDim2.new(0, S.NavW - 36, 1, 0)
 	NameLbl.TextYAlignment = Enum.TextYAlignment.Center
-
-	-- Hover
 	Btn.MouseEnter:Connect(function()
 		if self.CurrentTab ~= name then
 			Tween(Btn, {BackgroundTransparency = 0, BackgroundColor3 = Theme.NavHover}, 0.15)
@@ -557,36 +427,24 @@ local function CreateNavBtn(self, name, icon, onClick)
 			Tween(NameLbl, {TextColor3 = Theme.TextDim}, 0.15)
 		end
 	end)
-
 	Btn.MouseButton1Click:Connect(function()
 		onClick()
-
-		-- Deselect all
 		for _, nb in pairs(self.NavBtns) do
 			Tween(nb.Btn,       {BackgroundTransparency=1}, 0.15)
 			Tween(nb.Icon,      {TextColor3 = Theme.TextDim}, 0.15)
 			Tween(nb.Name,      {TextColor3 = Theme.TextDim}, 0.15)
 			Tween(nb.Indicator, {BackgroundTransparency=1}, 0.15)
 		end
-
-		-- Select this
 		self.CurrentTab = name
 		Tween(Btn,       {BackgroundTransparency=0, BackgroundColor3=Theme.NavSelected}, 0.15)
 		Tween(IconLbl,   {TextColor3 = Theme.Text},  0.15)
 		Tween(NameLbl,   {TextColor3 = Theme.Text},  0.15)
 		Tween(Indicator, {BackgroundTransparency=0}, 0.15)
 	end)
-
 	return {Btn=Btn, Icon=IconLbl, Name=NameLbl, Indicator=Indicator}
 end
-
--- ══════════════════════════════════════════════════════════════
---   ADD TAB
--- ══════════════════════════════════════════════════════════════
-function XenoLib:AddTab(name, icon)
+function _8y9Lib:AddTab(name, icon)
 	local S = Sizes
-
-	-- Tab page frame (hidden initially)
 	local Page = Frame(self.ContentScroll,
 		UDim2.new(1,0,0,0), UDim2.new(0,0,0,0),
 		Theme.Background, 1)
@@ -594,20 +452,15 @@ function XenoLib:AddTab(name, icon)
 	Page.AutomaticSize = Enum.AutomaticSize.Y
 	Page.Visible       = false
 	Padding(Page, nil, S.CardPad, S.CardPad, S.CardPad, S.CardPad)
-
-	-- Grid layout for cards
 	local Grid = Instance.new("UIGridLayout")
 	Grid.CellSize     = UDim2.new(0.5, -S.CardGap/2, 0, 0)
 	Grid.CellPadding  = UDim2.new(0, S.CardGap, 0, S.CardGap)
 	Grid.FillDirection = Enum.FillDirection.Horizontal
 	Grid.SortOrder    = Enum.SortOrder.LayoutOrder
 	Grid.Parent       = Page
-
-	-- For mobile: single column
 	if IsMobile then
 		Grid.CellSize = UDim2.new(1, 0, 0, 0)
 	end
-
 	local tabData = {
 		Name    = name,
 		Page    = Page,
@@ -615,16 +468,12 @@ function XenoLib:AddTab(name, icon)
 		Cards   = {},
 		NavBtn  = nil,
 	}
-
-	-- Nav button
 	local navBtn = CreateNavBtn(self, name, icon or "◆", function()
 		self:_ShowTab(name)
 	end)
 	tabData.NavBtn = navBtn
 	table.insert(self.NavBtns, navBtn)
 	self.Tabs[name] = tabData
-
-	-- Auto-select first tab
 	if not self.CurrentTab then
 		self:_ShowTab(name)
 		self.CurrentTab = name
@@ -635,10 +484,7 @@ function XenoLib:AddTab(name, icon)
 		nb.Name.TextColor3            = Theme.Text
 		nb.Indicator.BackgroundTransparency = 0
 	end
-
-	-- Return section builder
 	local Tab = {}
-
 	function Tab:AddSection(sectionName)
 		local S2 = Sizes
 		local Card = Frame(Page,
@@ -649,34 +495,24 @@ function XenoLib:AddTab(name, icon)
 		Card.LayoutOrder   = #tabData.Cards + 1
 		Corner(Card, S2.CardR)
 		Stroke(Card, Theme.CardBorder, 1)
-
 		local CardInner = Frame(Card, UDim2.new(1,0,0,0), UDim2.new(0,0,0,0), Theme.CardBG, 1)
 		CardInner.AutomaticSize = Enum.AutomaticSize.Y
 		Padding(CardInner, nil, S2.CardPad, S2.CardPad, S2.CardPad, S2.CardPad)
 		ListLayout(CardInner, Enum.FillDirection.Vertical, 6)
-
-		-- Section title
 		local TitleRow = Frame(CardInner, UDim2.new(1,0,0,22), UDim2.new(0,0,0,0), Theme.CardBG, 1)
 		ListLayout(TitleRow, Enum.FillDirection.Horizontal, 8)
 		local TitleLbl = Label(TitleRow, sectionName:upper(), S2.FontLabel + 1, Theme.TextMuted, Enum.Font.GothamBold)
 		TitleLbl.Size = UDim2.new(1,0,1,0)
 		TitleLbl.TextYAlignment = Enum.TextYAlignment.Center
-
-		-- Separator
 		local SepLine = Frame(CardInner, UDim2.new(1,0,0,1), UDim2.new(0,0,0,0), Theme.Border)
-
 		table.insert(tabData.Cards, Card)
-
 		local Section = {}
-
-		-- ── TOGGLE ──────────────────────────────────────────
 		function Section:AddToggle(opts)
 			opts = opts or {}
 			local Row = Frame(CardInner,
 				UDim2.new(1,0,0,S2.RowH), UDim2.new(0,0,0,0),
 				Theme.CardBG, 1)
 			ListLayout(Row, Enum.FillDirection.Horizontal, 0)
-
 			local LabelCol = Frame(Row, UDim2.new(1,-S2.ToggleW-8,1,0), UDim2.new(0,0,0,0), Theme.CardBG, 1)
 			local MainLbl  = Label(LabelCol, opts.Name or "Toggle", S2.FontBody, Theme.Text, Enum.Font.GothamBold)
 			MainLbl.Position = UDim2.new(0,0,0,2)
@@ -684,14 +520,12 @@ function XenoLib:AddTab(name, icon)
 				local DescLbl = Label(LabelCol, opts.Description, S2.FontLabel, Theme.TextDim, Enum.Font.Gotham)
 				DescLbl.Position = UDim2.new(0,0,0,S2.FontBody+4)
 			end
-
 			local ToggleHolder = Frame(Row, UDim2.new(0,S2.ToggleW+8,1,0), UDim2.new(0,0,0,0), Theme.CardBG, 1)
 			local ToggleBG = Frame(ToggleHolder,
 				UDim2.new(0,S2.ToggleW,0,S2.ToggleH),
 				UDim2.new(0,4,0.5,-S2.ToggleH/2),
 				opts.Default and Theme.Toggle_ON or Theme.Toggle_OFF)
 			Corner(ToggleBG, S2.ToggleH/2)
-
 			local Thumb = Frame(ToggleBG,
 				UDim2.new(0,S2.ToggleH-4,0,S2.ToggleH-4),
 				opts.Default
@@ -699,15 +533,12 @@ function XenoLib:AddTab(name, icon)
 					or  UDim2.new(0,2,0.5,-(S2.ToggleH-4)/2),
 				Color3.new(0,0,0))
 			Corner(Thumb, (S2.ToggleH-4)/2)
-
 			local state = opts.Default or false
-
 			local ToggleBtn = Instance.new("TextButton")
 			ToggleBtn.Size = UDim2.new(1,0,1,0)
 			ToggleBtn.BackgroundTransparency = 1
 			ToggleBtn.Text = ""
 			ToggleBtn.Parent = Row
-
 			local function SetToggle(val, animate)
 				state = val
 				local t = animate and 0.18 or 0
@@ -722,58 +553,46 @@ function XenoLib:AddTab(name, icon)
 				end
 				if opts.Callback then pcall(opts.Callback, state) end
 			end
-
 			SetToggle(opts.Default or false, false)
-
 			ToggleBtn.MouseButton1Click:Connect(function()
 				SetToggle(not state, true)
 			end)
-
 			return {
 				Set = function(_, v) SetToggle(v, true) end,
 				Get = function() return state end,
 			}
 		end
-
-		-- ── SLIDER ──────────────────────────────────────────
 		function Section:AddSlider(opts)
 			opts = opts or {}
 			local Min   = opts.Min   or 0
 			local Max   = opts.Max   or 100
 			local Value = opts.Value or Min
 			local Step  = opts.Step  or 1
-
 			local Row = Frame(CardInner,
 				UDim2.new(1,0,0,S2.RowH+10), UDim2.new(0,0,0,0),
 				Theme.CardBG, 1)
-
 			local LblRow = Frame(Row, UDim2.new(1,0,0,S2.FontBody+4), UDim2.new(0,0,0,0), Theme.CardBG, 1)
 			ListLayout(LblRow, Enum.FillDirection.Horizontal, 0)
 			local SlLbl  = Label(LblRow, opts.Name or "Slider", S2.FontBody, Theme.Text, Enum.Font.GothamBold)
 			SlLbl.Size   = UDim2.new(1,0,1,0)
 			local ValLbl = Label(LblRow, tostring(Value), S2.FontBody, Theme.AccentDim, Enum.Font.GothamBold, Enum.TextXAlignment.Right)
 			ValLbl.Size  = UDim2.new(0,40,1,0)
-
 			local Track = Frame(Row,
 				UDim2.new(1,0,0,S2.SliderH),
 				UDim2.new(0,0,0,S2.RowH-4),
 				Theme.SliderBG)
 			Corner(Track, S2.SliderH/2)
-
 			local Fill = Frame(Track,
 				UDim2.new((Value-Min)/(Max-Min),0,1,0),
 				UDim2.new(0,0,0,0),
 				Theme.Slider)
 			Corner(Fill, S2.SliderH/2)
-
 			local Thumb = Frame(Track,
 				UDim2.new(0,S2.ThumbR*2,0,S2.ThumbR*2),
 				UDim2.new((Value-Min)/(Max-Min),0,0.5,-S2.ThumbR),
 				Theme.Accent)
 			Corner(Thumb, S2.ThumbR)
-
 			local dragging = false
-
 			local function Update(px)
 				local rel = math.clamp((px - Track.AbsolutePosition.X) / Track.AbsoluteSize.X, 0, 1)
 				local raw = Min + rel * (Max - Min)
@@ -786,7 +605,6 @@ function XenoLib:AddTab(name, icon)
 				ValLbl.Text = tostring(math.floor(Value*100+0.5)/100)
 				if opts.Callback then pcall(opts.Callback, Value) end
 			end
-
 			Track.InputBegan:Connect(function(inp)
 				if inp.UserInputType == Enum.UserInputType.MouseButton1
 				or inp.UserInputType == Enum.UserInputType.Touch then
@@ -806,7 +624,6 @@ function XenoLib:AddTab(name, icon)
 					dragging = false
 				end
 			end)
-
 			return {
 				Set = function(_, v)
 					Value = math.clamp(v, Min, Max)
@@ -819,38 +636,29 @@ function XenoLib:AddTab(name, icon)
 				Get = function() return Value end,
 			}
 		end
-
-		-- ── DROPDOWN ────────────────────────────────────────
 		function Section:AddDropdown(opts)
 			opts = opts or {}
 			local options = opts.Options or {}
 			local selected = opts.Default or (options[1] or "")
 			local open = false
-
 			local Row = Frame(CardInner,
 				UDim2.new(1,0,0,S2.RowH), UDim2.new(0,0,0,0),
 				Theme.CardBG, 1)
 			ListLayout(Row, Enum.FillDirection.Horizontal, 8)
-
 			local LblCol = Frame(Row, UDim2.new(0.5,0,1,0), UDim2.new(0,0,0,0), Theme.CardBG, 1)
 			Label(LblCol, opts.Name or "Dropdown", S2.FontBody, Theme.Text, Enum.Font.GothamBold)
-
 			local DropBtn = Frame(Row, UDim2.new(0.5,-8,0,S2.DropH), UDim2.new(0,0,0.5,-S2.DropH/2), Theme.InputBG)
 			Corner(DropBtn, 6)
 			Stroke(DropBtn, Theme.InputBorder, 1)
 			Padding(DropBtn, nil, 0, 0, 8, 4)
 			ListLayout(DropBtn, Enum.FillDirection.Horizontal, 0)
-
 			local SelLbl = Label(DropBtn, selected, S2.FontBody, Theme.Text, Enum.Font.Gotham)
 			SelLbl.Size  = UDim2.new(1,-16,1,0)
 			SelLbl.TextYAlignment = Enum.TextYAlignment.Center
-
 			local Arrow = Label(DropBtn, "▾", S2.FontBody, Theme.TextDim, Enum.Font.GothamBold)
 			Arrow.Size   = UDim2.new(0,14,1,0)
 			Arrow.TextXAlignment = Enum.TextXAlignment.Right
 			Arrow.TextYAlignment = Enum.TextYAlignment.Center
-
-			-- Dropdown menu
 			local Menu = Frame(CardInner,
 				UDim2.new(1,0,0,0), UDim2.new(0,0,0,0),
 				Theme.DropdownBG)
@@ -862,7 +670,6 @@ function XenoLib:AddTab(name, icon)
 			Stroke(Menu, Theme.InputBorder, 1)
 			Padding(Menu, 4)
 			ListLayout(Menu, Enum.FillDirection.Vertical, 2)
-
 			for _, opt in ipairs(options) do
 				local OptBtn = Instance.new("TextButton")
 				OptBtn.Size = UDim2.new(1,0,0,S2.DropH-4)
@@ -872,12 +679,10 @@ function XenoLib:AddTab(name, icon)
 				OptBtn.BorderSizePixel = 0
 				OptBtn.Parent = Menu
 				Corner(OptBtn, 5)
-
 				local OptLbl = Label(OptBtn, opt, S2.FontBody, Theme.TextDim, Enum.Font.Gotham)
 				OptLbl.Size = UDim2.new(1,-8,1,0)
 				OptLbl.Position = UDim2.new(0,8,0,0)
 				OptLbl.TextYAlignment = Enum.TextYAlignment.Center
-
 				OptBtn.MouseEnter:Connect(function()
 					Tween(OptBtn, {BackgroundTransparency=0, BackgroundColor3=Theme.NavHover}, 0.12)
 					Tween(OptLbl, {TextColor3=Theme.Text}, 0.12)
@@ -895,19 +700,16 @@ function XenoLib:AddTab(name, icon)
 					if opts.Callback then pcall(opts.Callback, opt) end
 				end)
 			end
-
 			local DB = Instance.new("TextButton")
 			DB.Size = UDim2.new(1,0,1,0)
 			DB.BackgroundTransparency = 1
 			DB.Text = ""
 			DB.Parent = DropBtn
-
 			DB.MouseButton1Click:Connect(function()
 				open = not open
 				Menu.Visible = open
 				Tween(Arrow, {Rotation = open and 180 or 0}, 0.2)
 			end)
-
 			return {
 				Set = function(_, v)
 					selected = v
@@ -917,27 +719,21 @@ function XenoLib:AddTab(name, icon)
 				Get = function() return selected end,
 			}
 		end
-
-		-- ── INPUT ───────────────────────────────────────────
 		function Section:AddInput(opts)
 			opts = opts or {}
-
 			local Row = Frame(CardInner,
 				UDim2.new(1,0,0,S2.RowH), UDim2.new(0,0,0,0),
 				Theme.CardBG, 1)
 			ListLayout(Row, Enum.FillDirection.Horizontal, 8)
-
 			local LblCol = Frame(Row, UDim2.new(0.45,0,1,0), UDim2.new(0,0,0,0), Theme.CardBG, 1)
 			Label(LblCol, opts.Name or "Input", S2.FontBody, Theme.Text, Enum.Font.GothamBold)
 			if opts.Description then
 				local D = Label(LblCol, opts.Description, S2.FontLabel, Theme.TextDim, Enum.Font.Gotham)
 				D.Position = UDim2.new(0,0,0,S2.FontBody+4)
 			end
-
 			local InputBox = Frame(Row, UDim2.new(0.55,-8,0,S2.InputH), UDim2.new(0,0,0.5,-S2.InputH/2), Theme.InputBG)
 			Corner(InputBox, 6)
 			Stroke(InputBox, Theme.InputBorder, 1)
-
 			local TBox = Instance.new("TextBox")
 			TBox.Size               = UDim2.new(1,-16,1,0)
 			TBox.Position           = UDim2.new(0,8,0,0)
@@ -951,39 +747,30 @@ function XenoLib:AddTab(name, icon)
 			TBox.TextXAlignment     = Enum.TextXAlignment.Left
 			TBox.ClearTextOnFocus   = false
 			TBox.Parent             = InputBox
-
 			TBox.FocusLost:Connect(function()
 				if opts.Callback then pcall(opts.Callback, TBox.Text) end
 			end)
-
-			-- Focus glow
 			TBox.Focused:Connect(function()
 				Tween(InputBox, {BackgroundColor3 = Theme.NavSelected}, 0.15)
 			end)
 			TBox.FocusLost:Connect(function()
 				Tween(InputBox, {BackgroundColor3 = Theme.InputBG}, 0.15)
 			end)
-
 			return {
 				Set = function(_, v) TBox.Text = v end,
 				Get = function() return TBox.Text end,
 			}
 		end
-
-		-- ── KEYBIND ─────────────────────────────────────────
 		function Section:AddKeybind(opts)
 			opts = opts or {}
 			local bound = opts.Default or Enum.KeyCode.Unknown
 			local listening = false
-
 			local Row = Frame(CardInner,
 				UDim2.new(1,0,0,S2.RowH), UDim2.new(0,0,0,0),
 				Theme.CardBG, 1)
 			ListLayout(Row, Enum.FillDirection.Horizontal, 8)
-
 			local LblCol = Frame(Row, UDim2.new(0.5,0,1,0), UDim2.new(0,0,0,0), Theme.CardBG, 1)
 			Label(LblCol, opts.Name or "Key Bind", S2.FontBody, Theme.Text, Enum.Font.GothamBold)
-
 			local KeyBtn = Instance.new("TextButton")
 			KeyBtn.Size              = UDim2.new(0.5,-8,0,S2.InputH)
 			KeyBtn.Position          = UDim2.new(0,0,0.5,-S2.InputH/2)
@@ -997,13 +784,11 @@ function XenoLib:AddTab(name, icon)
 			KeyBtn.Parent            = Row
 			Corner(KeyBtn, 6)
 			Stroke(KeyBtn, Theme.ButtonBorder, 1)
-
 			KeyBtn.MouseButton1Click:Connect(function()
 				listening = true
 				KeyBtn.Text = "..."
 				KeyBtn.TextColor3 = Theme.AccentDim
 			end)
-
 			UserInputService.InputBegan:Connect(function(inp, gp)
 				if listening and not gp then
 					if inp.UserInputType == Enum.UserInputType.Keyboard then
@@ -1015,13 +800,10 @@ function XenoLib:AddTab(name, icon)
 					end
 				end
 			end)
-
 			return {
 				Get = function() return bound end,
 			}
 		end
-
-		-- ── LABEL ───────────────────────────────────────────
 		function Section:AddLabel(text)
 			local Row = Frame(CardInner,
 				UDim2.new(1,0,0,S2.RowH-8), UDim2.new(0,0,0,0),
@@ -1031,25 +813,16 @@ function XenoLib:AddTab(name, icon)
 			L.TextYAlignment = Enum.TextYAlignment.Center
 			return {Set = function(_,v) L.Text = v end}
 		end
-
-		-- ── SEPARATOR ───────────────────────────────────────
 		function Section:AddSeparator()
 			Frame(CardInner, UDim2.new(1,0,0,1), UDim2.new(0,0,0,0), Theme.Border)
 		end
-
 		return Section
 	end
-
 	return Tab
 end
-
--- ══════════════════════════════════════════════════════════════
---   BOTTOM BAR BUTTON
--- ══════════════════════════════════════════════════════════════
-function XenoLib:AddBottomButton(opts)
+function _8y9Lib:AddBottomButton(opts)
 	opts = opts or {}
 	local S = Sizes
-
 	local Btn = Instance.new("TextButton")
 	Btn.Size             = UDim2.new(0, opts.Width or 120, 1, -12)
 	Btn.BackgroundColor3 = opts.Primary and Theme.Accent or Theme.ButtonBG
@@ -1062,7 +835,6 @@ function XenoLib:AddBottomButton(opts)
 	Btn.Parent           = self.BotBtnRow
 	Corner(Btn, S.CornerR - 2)
 	if not opts.Primary then Stroke(Btn, Theme.ButtonBorder, 1) end
-
 	Btn.MouseEnter:Connect(function()
 		Tween(Btn, {BackgroundColor3 = opts.Primary
 			and Theme.Accent:Lerp(Color3.new(0.8,0.8,0.8),0.2)
@@ -1072,32 +844,23 @@ function XenoLib:AddBottomButton(opts)
 		Tween(Btn, {BackgroundColor3 = opts.Primary and Theme.Accent or Theme.ButtonBG}, 0.15)
 	end)
 	Btn.MouseButton1Click:Connect(function()
-		-- Click ripple
 		Tween(Btn, {BackgroundTransparency = 0.3}, 0.08)
 		task.delay(0.08, function()
 			Tween(Btn, {BackgroundTransparency = 0}, 0.12)
 		end)
 		if opts.Callback then pcall(opts.Callback) end
 	end)
-
-	-- Right-align "Save Settings" if specified
 	if opts.RightAlign then
 		Btn.Size = UDim2.new(0, opts.Width or 140, 1, -12)
 		Btn.LayoutOrder = 999
 		local spacer = Frame(self.BotBtnRow, UDim2.new(1,0,0,1), UDim2.new(0,0,0,0), Theme.Background, 1)
 		spacer.LayoutOrder = 998
 	end
-
 	return Btn
 end
-
--- ══════════════════════════════════════════════════════════════
---   NOTIFICATION
--- ══════════════════════════════════════════════════════════════
-function XenoLib:Notify(opts)
+function _8y9Lib:Notify(opts)
 	opts = opts or {}
 	local S = Sizes
-
 	local NotiHolder = Frame(self.ScreenGui,
 		UDim2.new(0,260,0,0), UDim2.new(1,-275,1,-20),
 		Theme.CardBG)
@@ -1107,27 +870,18 @@ function XenoLib:Notify(opts)
 	Stroke(NotiHolder, Theme.Border, 1)
 	Padding(NotiHolder, 12)
 	ListLayout(NotiHolder, Enum.FillDirection.Vertical, 4)
-
 	Label(NotiHolder, opts.Title or "Notification", S.FontBody, Theme.Text, Enum.Font.GothamBold)
 	if opts.Content then
 		Label(NotiHolder, opts.Content, S.FontLabel, Theme.TextDim, Enum.Font.Gotham)
 	end
-
-	-- Slide in
 	Tween(NotiHolder, {Position = UDim2.new(1,-275,1,-80)}, 0.3, Enum.EasingStyle.Quint)
-
-	-- Auto close
 	local dur = opts.Duration or 3
 	task.delay(dur, function()
 		Tween(NotiHolder, {Position = UDim2.new(1,10,1,-80), BackgroundTransparency=1}, 0.25)
 		task.delay(0.3, function() NotiHolder:Destroy() end)
 	end)
 end
-
--- ══════════════════════════════════════════════════════════════
---   SHOW TAB (internal)
--- ══════════════════════════════════════════════════════════════
-function XenoLib:_ShowTab(name)
+function _8y9Lib:_ShowTab(name)
 	for tname, tdata in pairs(self.Tabs) do
 		tdata.Page.Visible = (tname == name)
 	end
@@ -1135,18 +889,13 @@ function XenoLib:_ShowTab(name)
 	if tab then
 		self.PageTitle.Text    = name
 		self.PageSubtitle.Text = tab.Subtitle or (name:sub(1,1):upper()..name:sub(2):lower().." features and settings")
-		-- Slide animation
 		local Page = tab.Page
 		Page.Position = UDim2.new(0.05,0,0,0)
 		Page.BackgroundTransparency = 1
 		Tween(Page, {Position=UDim2.new(0,0,0,0), BackgroundTransparency=1}, 0.2, Enum.EasingStyle.Quint)
 	end
 end
-
--- ══════════════════════════════════════════════════════════════
---   TOGGLE WINDOW VISIBILITY
--- ══════════════════════════════════════════════════════════════
-function XenoLib:Toggle()
+function _8y9Lib:Toggle()
 	self.Toggled = not self.Toggled
 	if self.Toggled then
 		self.Window.Visible = true
@@ -1154,7 +903,6 @@ function XenoLib:Toggle()
 			Size = UDim2.new(0,Sizes.WindowW,0,Sizes.WindowH),
 			BackgroundTransparency = 0
 		}, 0.3, Enum.EasingStyle.Quint)
-		-- Float button: fade slightly when menu open
 		if self._FloatBtn then
 			Tween(self._FloatBtn, {BackgroundTransparency = 0.3}, 0.2)
 		end
@@ -1164,31 +912,17 @@ function XenoLib:Toggle()
 			BackgroundTransparency = 1
 		}, 0.25, Enum.EasingStyle.Quint)
 		task.delay(0.3, function() self.Window.Visible = false end)
-		-- Float button: fully visible when menu closed
 		if self._FloatBtn then
 			Tween(self._FloatBtn, {BackgroundTransparency = 0}, 0.2)
 		end
 	end
 end
-
--- ══════════════════════════════════════════════════════════════
---   DESTROY
--- ══════════════════════════════════════════════════════════════
-function XenoLib:Destroy()
+function _8y9Lib:Destroy()
 	if self.ScreenGui then self.ScreenGui:Destroy() end
 end
-
--- ══════════════════════════════════════════════════════════════
---   DEVICE INFO (utility)
--- ══════════════════════════════════════════════════════════════
-XenoLib.IsMobile = IsMobile
-XenoLib.Device   = IsMobile and "Mobile" or "PC"
-
-
--- ══════════════════════════════════════════════════════════════
---   FLOATING BUTTON (draggable, opens/closes menu)
--- ══════════════════════════════════════════════════════════════
-function XenoLib:_CreateFloatButton(config)
+_8y9Lib.IsMobile = IsMobile
+_8y9Lib.Device   = IsMobile and "Mobile" or "PC"
+function _8y9Lib:_CreateFloatButton(config)
 	local floatGui = Instance.new("ScreenGui")
 	floatGui.Name           = "8y9FloatBtn"
 	floatGui.ResetOnSpawn   = false
@@ -1196,38 +930,29 @@ function XenoLib:_CreateFloatButton(config)
 	floatGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 	pcall(function() floatGui.Parent = CoreGui end)
 	if not floatGui.Parent then floatGui.Parent = LocalPlayer:WaitForChild("PlayerGui") end
-
 	local BtnSize = IsMobile and 52 or 46
-
 	local Frame_ = Instance.new("Frame")
 	Frame_.Name                  = "FloatFrame"
 	Frame_.Size                  = UDim2.new(0, BtnSize, 0, BtnSize)
-	Frame_.Position              = UDim2.new(0, 280, 0, 115)
+	Frame_.Position              = IsMobile and UDim2.new(1, -(BtnSize+14), 0, 180) or UDim2.new(1, -(BtnSize+14), 0, 140)
 	Frame_.BackgroundColor3      = Color3.fromRGB(15,15,15)
 	Frame_.BackgroundTransparency = 0
 	Frame_.BorderSizePixel       = 0
 	Frame_.Active                = true
 	Frame_.Parent                = floatGui
 	Corner(Frame_, 14)
-
-	-- Glow stroke
 	local GlowStroke = Instance.new("UIStroke")
 	GlowStroke.Color     = Color3.fromRGB(70,70,70)
 	GlowStroke.Thickness = 1.5
 	GlowStroke.Parent    = Frame_
-
-	-- Inner highlight ring
 	local Highlight = Frame(Frame_,
 		UDim2.new(1,-6,1,-6), UDim2.new(0,3,0,3),
 		Color3.fromRGB(255,255,255), 0.92)
 	Corner(Highlight, 11)
-
-	-- Icon
 	local IconHolder = Frame(Frame_,
 		UDim2.new(1,-10,1,-10), UDim2.new(0,5,0,5),
 		Color3.fromRGB(0,0,0), 1)
 	Corner(IconHolder, 10)
-
 	if config and config.Icon then
 		local FImg = Instance.new("ImageLabel")
 		FImg.Image                  = config.Icon
@@ -1242,21 +967,15 @@ function XenoLib:_CreateFloatButton(config)
 		FLbl.Size = UDim2.new(1,0,1,0)
 		FLbl.TextYAlignment = Enum.TextYAlignment.Center
 	end
-
-	-- Click button (on top, transparent)
 	local ClickBtn = Instance.new("TextButton")
 	ClickBtn.Size                   = UDim2.new(1,0,1,0)
 	ClickBtn.BackgroundTransparency = 1
 	ClickBtn.Text                   = ""
 	ClickBtn.ZIndex                 = 10
 	ClickBtn.Parent                 = Frame_
-
 	self._FloatBtn = Frame_
-
-	-- ── Drag logic ──────────────────────────────────────────
 	local dragging, dragStart, startPos_ = false, nil, nil
 	local moved = false
-
 	Frame_.InputBegan:Connect(function(inp)
 		if inp.UserInputType == Enum.UserInputType.MouseButton1
 		or inp.UserInputType == Enum.UserInputType.Touch then
@@ -1267,7 +986,6 @@ function XenoLib:_CreateFloatButton(config)
 			Tween(Frame_, {BackgroundColor3 = Color3.fromRGB(25,25,25)}, 0.1)
 		end
 	end)
-
 	UserInputService.InputChanged:Connect(function(inp)
 		if dragging and (
 			inp.UserInputType == Enum.UserInputType.MouseMovement or
@@ -1280,7 +998,6 @@ function XenoLib:_CreateFloatButton(config)
 				startPos_.Y.Scale, startPos_.Y.Offset + delta.Y)
 		end
 	end)
-
 	UserInputService.InputEnded:Connect(function(inp)
 		if inp.UserInputType == Enum.UserInputType.MouseButton1
 		or inp.UserInputType == Enum.UserInputType.Touch then
@@ -1288,20 +1005,15 @@ function XenoLib:_CreateFloatButton(config)
 			Tween(Frame_, {BackgroundColor3 = Color3.fromRGB(15,15,15)}, 0.15)
 		end
 	end)
-
-	-- ── Click to toggle (only if not dragged) ───────────────
 	ClickBtn.MouseButton1Click:Connect(function()
 		if not moved then
 			self:Toggle()
-			-- Pulse animation
 			Tween(Frame_, {BackgroundColor3 = Color3.fromRGB(50,50,50)}, 0.08)
 			task.delay(0.08, function()
 				Tween(Frame_, {BackgroundColor3 = Color3.fromRGB(15,15,15)}, 0.2)
 			end)
 		end
 	end)
-
-	-- ── PC: K key to toggle ─────────────────────────────────
 	if not IsMobile then
 		UserInputService.InputBegan:Connect(function(inp, gp)
 			if not gp and inp.KeyCode == Enum.KeyCode.K then
@@ -1313,8 +1025,6 @@ function XenoLib:_CreateFloatButton(config)
 			end
 		end)
 	end
-
 	return floatGui
 end
-
-return XenoLib
+return _8y9Lib
